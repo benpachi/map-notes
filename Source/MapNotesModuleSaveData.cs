@@ -1,5 +1,6 @@
 namespace Celeste.Mod.MapNotes;
 
-public class MapNotesModuleSaveData : EverestModuleSaveData {
+public class MapNotesModuleSaveData : EverestModuleSaveData 
+{
 
 }

@@ -19,7 +19,7 @@ namespace Celeste.Mod.MapNotes.Entities {
         public NoteOverlayCell(Vector2 position, Color[] data, int width, int height) {
             Visible = Settings.NoteOverlayEnabled;
             Depth = -100;
-            Tag = Tags.PauseUpdate | Tags.Persistent;
+            Tag = Tags.PauseUpdate | Tags.FrozenUpdate | Tags.Persistent | TagsExt.SubHUD;
             Texture = new Texture2D(Engine.Graphics.GraphicsDevice, width, height);
             Texture.SetData(data);
             Position = position;
@@ -28,6 +28,7 @@ namespace Celeste.Mod.MapNotes.Entities {
         public override void Update() {
             base.Update();
             Visible = Settings.NoteOverlayEnabled;
+            // I guess the texture updates... here????
         }
 
         public override void Render() {

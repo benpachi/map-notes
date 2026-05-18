@@ -31,13 +31,15 @@ public class MapNotesModule : EverestModule {
 
     public override void Load() {
         On.Celeste.Level.Update += OnLevelUpdate;
-        On.Celeste.Level.Begin += OnLevelEnter;
+        Everest.Events.Level.OnLoadLevel += Level_OnLoadLevel;
     }
 
     public override void Unload() {
         On.Celeste.Level.Update -= OnLevelUpdate;
-        On.Celeste.Level.Begin -= OnLevelEnter;
+        Everest.Events.Level.OnLoadLevel -= Level_OnLoadLevel;
     }
+
+    /* Hooks */
 
     private static void OnLevelUpdate(On.Celeste.Level.orig_Update orig, Level self) {
         orig(self);
@@ -47,14 +49,20 @@ public class MapNotesModule : EverestModule {
         }
     }
 
-    private static void OnLevelEnter(On.Celeste.Level.orig_Begin orig, Level self) {
-        orig(self);
+    private static void Level_OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
 
-        var levelNoteCellData = GetLevelNoteCellData(self);
+        if (isFromLoader) {
+            var noteOverlay = new NoteOverlay();
+            level.Add(noteOverlay);
+        }
+
+        var levelNoteCellData = GetLevelNoteCellData(level);
         foreach (KeyValuePair<Vector2, MapNotesModuleSaveData.NoteCellData> noteCellData in levelNoteCellData) {
-            self.Add(new NoteOverlayCell(noteCellData.Key, noteCellData.Value.TextureData, noteCellData.Value.Width, noteCellData.Value.Height));
+            level.Add(new NoteOverlayCell(noteCellData.Key, noteCellData.Value.TextureData, noteCellData.Value.Width, noteCellData.Value.Height));
         }
     }
+
+    /* Note cells */
 
     public static Dictionary<Vector2, MapNotesModuleSaveData.NoteCellData> GetLevelNoteCellData(Level level) {
         if (!SaveData.NoteCellDict.ContainsKey(level)) {

@@ -4,4 +4,5 @@ public class MapNotesModuleSettings : EverestModuleSettings {
     public bool NoteOverlayEnabled { get; set; } 
 
     public ButtonBinding ButtonToggleNoteOverlay { get; set; }
+    public ButtonBinding ButtonCursorInteract { get; set; }
 }

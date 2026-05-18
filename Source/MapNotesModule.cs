@@ -52,8 +52,8 @@ public class MapNotesModule : EverestModule {
     private static void Level_OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
 
         if (isFromLoader) {
-            var noteOverlay = new NoteOverlay();
-            level.Add(noteOverlay);
+            var noteOverlayCursor = new NoteOverlayCursor();
+            level.Add(noteOverlayCursor);
         }
 
         var levelNoteCellData = GetLevelNoteCellData(level);
@@ -71,7 +71,10 @@ public class MapNotesModule : EverestModule {
         return SaveData.NoteCellDict[level];
     }
 
-    public static void AddNoteCellData(Level level, Vector2 position, int width, int height) {
+    public static void AddPixelData(Level level, Color[] data, Vector2 position, int width, int height) {
+        // get which pixels need to be added to which notecells
+        // write to the notecells (create one if not defined yet)
+        // 
         SaveData.NoteCellDict[level][position] = new MapNotesModuleSaveData.NoteCellData(new Color[width * height], width, height);
         level.Add(new NoteOverlayCell(position, SaveData.NoteCellDict[level][position].TextureData, width, height));
     }

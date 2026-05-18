@@ -1,6 +1,8 @@
 ﻿using System;
 using Celeste.Mod.MapNotes.Entities;
 using Celeste.Mod.MapNotes;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace Celeste.Mod.MapNotes;
 
@@ -29,15 +31,15 @@ public class MapNotesModule : EverestModule {
 
     public override void Load() {
         On.Celeste.Level.Update += OnLevelUpdate;
-        Everest.Events.Level.OnLoadLevel += Level_OnLoadLevel;
+        On.Celeste.Level.Begin += OnLevelEnter;
     }
 
     public override void Unload() {
         On.Celeste.Level.Update -= OnLevelUpdate;
-        Everest.Events.Level.OnLoadLevel -= Level_OnLoadLevel;
+        On.Celeste.Level.Begin -= OnLevelEnter;
     }
 
-    private void OnLevelUpdate(On.Celeste.Level.orig_Update orig, Level self) {
+    private static void OnLevelUpdate(On.Celeste.Level.orig_Update orig, Level self) {
         orig(self);
 
         if (Settings.ButtonToggleNoteOverlay.Pressed) {
@@ -45,9 +47,24 @@ public class MapNotesModule : EverestModule {
         }
     }
 
-    private void Level_OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
-        if (isFromLoader) {
-            level.Add(new NoteOverlay());
+    private static void OnLevelEnter(On.Celeste.Level.orig_Begin orig, Level self) {
+        orig(self);
+
+        var levelNoteCellData = GetLevelNoteCellData(self);
+        foreach (KeyValuePair<Vector2, MapNotesModuleSaveData.NoteCellData> noteCellData in levelNoteCellData) {
+            self.Add(new NoteOverlayCell(noteCellData.Key, noteCellData.Value.TextureData, noteCellData.Value.Width, noteCellData.Value.Height));
         }
+    }
+
+    public static Dictionary<Vector2, MapNotesModuleSaveData.NoteCellData> GetLevelNoteCellData(Level level) {
+        if (!SaveData.NoteCellDict.ContainsKey(level)) {
+            SaveData.NoteCellDict[level] = [];
+        }
+        return SaveData.NoteCellDict[level];
+    }
+
+    public static void AddNoteCellData(Level level, Vector2 position, int width, int height) {
+        SaveData.NoteCellDict[level][position] = new MapNotesModuleSaveData.NoteCellData(new Color[width * height], width, height);
+        level.Add(new NoteOverlayCell(position, SaveData.NoteCellDict[level][position].TextureData, width, height));
     }
 }

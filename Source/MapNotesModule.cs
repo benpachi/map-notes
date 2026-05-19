@@ -30,8 +30,8 @@ public class MapNotesModule : EverestModule {
     }
 
     public override void Load() {
-        On.Celeste.Level.Update += OnLevelUpdate;
         Everest.Events.Level.OnLoadLevel += Level_OnLoadLevel;
+        On.Celeste.Level.Update += OnLevelUpdate;
     }
 
     public override void Unload() {
@@ -50,32 +50,43 @@ public class MapNotesModule : EverestModule {
     }
 
     private static void Level_OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
+        string mapName = level.Session.Area.SID;
+        string roomName = level.Session.Level;
 
         if (isFromLoader) {
             var noteOverlayCursor = new NoteOverlayCursor();
             level.Add(noteOverlayCursor);
+            if (!SaveData.NoteCellDict.ContainsKey(mapName)) {
+                SaveData.NoteCellDict[mapName] = new Dictionary<string, Color[]>();
+            }
         }
 
-        var levelNoteCellData = GetLevelNoteCellData(level);
-        foreach (KeyValuePair<Vector2, MapNotesModuleSaveData.NoteCellData> noteCellData in levelNoteCellData) {
-            level.Add(new NoteOverlayCell(noteCellData.Key, noteCellData.Value.TextureData, noteCellData.Value.Width, noteCellData.Value.Height));
+        Vector2 roomPos = new Vector2(level.Bounds.Left, level.Bounds.Top);
+        int roomWidth = level.Bounds.Width;
+        int roomHeight = level.Bounds.Height;
+
+        if (!SaveData.NoteCellDict[mapName].ContainsKey(roomName)) {
+            SaveData.NoteCellDict[mapName][roomName] = new Color[roomWidth * roomHeight];
         }
+
+        level.Add(new NoteOverlayCell(mapName, roomName, roomPos, roomWidth, roomHeight));
     }
 
-    /* Note cells */
+    public static void AddPixelData(Level level, Vector2 position, Color[] brushData, int width, int height) {
+        string mapName = level.Session.Area.SID;
+        string levelName = level.Session.Level;
 
-    public static Dictionary<Vector2, MapNotesModuleSaveData.NoteCellData> GetLevelNoteCellData(Level level) {
-        if (!SaveData.NoteCellDict.ContainsKey(level)) {
-            SaveData.NoteCellDict[level] = [];
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                int index = y * width + x;
+                Color color = brushData[index];
+                Vector2 pixelPosition = new Vector2(x + position.X, y + position.Y);
+
+                int roomWidth = level.Bounds.Width;
+
+                int pixelIndex = (int)(pixelPosition.Y * roomWidth + pixelPosition.X);
+                SaveData.NoteCellDict[mapName][levelName][pixelIndex] = color;
+            }
         }
-        return SaveData.NoteCellDict[level];
-    }
-
-    public static void AddPixelData(Level level, Color[] data, Vector2 position, int width, int height) {
-        // get which pixels need to be added to which notecells
-        // write to the notecells (create one if not defined yet)
-        // 
-        SaveData.NoteCellDict[level][position] = new MapNotesModuleSaveData.NoteCellData(new Color[width * height], width, height);
-        level.Add(new NoteOverlayCell(position, SaveData.NoteCellDict[level][position].TextureData, width, height));
     }
 }

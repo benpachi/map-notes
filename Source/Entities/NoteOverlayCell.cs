@@ -13,26 +13,29 @@ namespace Celeste.Mod.MapNotes.Entities {
         private static MapNotesModuleSettings Settings => MapNotesModule.Settings;
         private static MapNotesModuleSaveData SaveData => MapNotesModule.SaveData;
 
-        private static float Scale => 6f;
+        public string MapName;
+        public string LevelName;
         public Texture2D Texture;
 
-        public NoteOverlayCell(Vector2 position, Color[] data, int width, int height) {
+        public NoteOverlayCell(string mapName, string levelName, Vector2 position, int width, int height) {
             Visible = Settings.NoteOverlayEnabled;
-            Depth = -100;
-            Tag = Tags.PauseUpdate | Tags.FrozenUpdate | Tags.Persistent;
+            Depth = -100000;
+            Tag = Tags.PauseUpdate | Tags.FrozenUpdate;
             Texture = new Texture2D(Engine.Graphics.GraphicsDevice, width, height);
-            Texture.SetData(data);
             Position = position;
+            LevelName = levelName;
+            MapName = mapName;
         }
 
         public override void Update() {
             base.Update();
             Visible = Settings.NoteOverlayEnabled;
+            Texture.SetData(SaveData.NoteCellDict[MapName][LevelName]);
         }
 
         public override void Render() {
             base.Render();
-            Draw.SpriteBatch.Draw(Texture, Position, null, Color.White, 0f, Position, Scale, SpriteEffects.None, Depth);
+            Draw.SpriteBatch.Draw(Texture, Position, Color.White);
         }
     }
 }

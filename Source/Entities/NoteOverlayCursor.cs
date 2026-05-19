@@ -16,10 +16,10 @@ namespace Celeste.Mod.MapNotes.Entities {
 
         public Vector2 mousePos;
         public Vector2 cameraOffset; // Top left position of camera
+        public Vector2 levelPos;
         public Color[] BrushData;
         public Texture2D BrushTexture;
         public int brushSize = 6;
-
 
 
         public NoteOverlayCursor() {
@@ -50,15 +50,18 @@ namespace Celeste.Mod.MapNotes.Entities {
 
             Visible = Settings.NoteOverlayEnabled;
 
-            //if (Settings.ButtonCursorInteract.Pressed) {
-              //  MapNotesModule.
-            //}
+            levelPos.X = (int)Math.Abs(level.Bounds.Left - Position.X);
+            levelPos.Y = (int)Math.Abs(level.Bounds.Bottom - Position.Y - level.Session.LevelData.Bounds.Height);
+
+            if (Settings.ButtonCursorInteract.Check) {
+                MapNotesModule.AddPixelData(level, levelPos, BrushData, brushSize, brushSize);
+            }
         }
 
         public override void Render() {
             base.Render();
             Draw.SpriteBatch.Draw(BrushTexture, Position, Color.White);
-            ActiveFont.Draw(Position.ToString(), cameraOffset, default, new Vector2(0.2f, 0.2f), Color.Black);
+            ActiveFont.Draw(levelPos.ToString(), cameraOffset, default, new Vector2(0.2f, 0.2f), Color.Black);
         }
     }
 }

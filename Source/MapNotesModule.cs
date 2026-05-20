@@ -54,8 +54,8 @@ public class MapNotesModule : EverestModule {
         string roomName = level.Session.Level;
 
         if (isFromLoader) {
-            var noteOverlayCursor = new NoteOverlayCursor();
-            level.Add(noteOverlayCursor);
+            var noteController = new NoteController();
+            level.Add(noteController);
             if (!SaveData.NoteCellDict.ContainsKey(mapName)) {
                 SaveData.NoteCellDict[mapName] = new Dictionary<string, Color[]>();
             }

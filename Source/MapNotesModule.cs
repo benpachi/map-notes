@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Celeste.Mod.MapNotes;
 using Celeste.Mod.MapNotes.Entities;
-using Celeste.Mod.MapNotes;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace Celeste.Mod.MapNotes;
 
@@ -56,27 +56,29 @@ public class MapNotesModule : EverestModule {
         if (isFromLoader) {
             var noteController = new NoteController();
             level.Add(noteController);
-            if (!SaveData.NoteCellDict.ContainsKey(mapName)) {
-                SaveData.NoteCellDict[mapName] = new Dictionary<string, Color[]>();
-            }
         }
 
         Vector2 roomPos = new Vector2(level.Bounds.Left, level.Bounds.Top);
         int roomWidth = level.Bounds.Width;
         int roomHeight = level.Bounds.Height;
 
-        if (!SaveData.NoteCellDict[mapName].ContainsKey(roomName)) {
-            SaveData.NoteCellDict[mapName][roomName] = new Color[roomWidth * roomHeight];
+        if (!SaveData.NoteCellDict.ContainsKey((mapName, roomName))) {
+            SaveData.NoteCellDict[(mapName, roomName)] = new Color[roomWidth * roomHeight];
         }
 
         level.Add(new NoteOverlayCell(mapName, roomName, roomPos, roomWidth, roomHeight));
     }
 
-    public static void AddPixelData(Level level, Vector2 position, Color[] brushData, int width, int height) {
+    public static void AddPixelData(Level level, Dictionary<Vector2, Color> pixels) {
         string mapName = level.Session.Area.SID;
-        string levelName = level.Session.Level;
+        string roomName = level.Session.Level;
 
-        for (int y = 0; y < height; ++y) {
+        foreach (KeyValuePair<Vector2, Color> pixel in pixels) {
+            int pixelIndex = (int)(pixel.Key.Y * level.Bounds.Width + pixel.Key.X);
+            SaveData.NoteCellDict[(mapName, roomName)][pixelIndex] = pixel.Value;
+        }
+
+        /*for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 int index = y * width + x;
                 Color color = brushData[index];
@@ -85,8 +87,8 @@ public class MapNotesModule : EverestModule {
                 int roomWidth = level.Bounds.Width;
 
                 int pixelIndex = (int)(pixelPosition.Y * roomWidth + pixelPosition.X);
-                SaveData.NoteCellDict[mapName][levelName][pixelIndex] = color;
+                SaveData.NoteCellDict[(mapName, roomName)][pixelIndex] = color;
             }
-        }
+        }*/
     }
 }

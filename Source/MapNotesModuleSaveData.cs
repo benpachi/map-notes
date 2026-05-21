@@ -5,7 +5,6 @@ using System.Collections.Generic;
 namespace Celeste.Mod.MapNotes;
 
 public class MapNotesModuleSaveData : EverestModuleSaveData {
-    // Outer string: map name
-    // Inner string: room name
-    public Dictionary<string, Dictionary<string, Color[]>> NoteCellDict { get; set; } = [];
+    // Indexed by map name, room name
+    public Dictionary<(string, string), Color[]> NoteCellDict { get; set; } = [];
 }

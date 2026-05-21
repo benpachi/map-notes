@@ -8,14 +8,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Celeste.Mod.MapNotes.Entities {
-    public class NoteController : Entity {
-        public Vector2 mousePos;
-        public Vector2 cameraOffset; // Top left position of camera
-        public Vector2 levelPos;
+    public class EditController : Entity {
+        public Vector2 mouseViewportPosition;
+        public Vector2 mouseWorldPosition;
+        public Vector2 mouseRoomPosition;
+        public Vector2 mouseDelta; // In Celeste pixels
+
         public Level level;
 
         public class Tool : Entity {
-            public NoteController Parent;
+            public EditController Parent;
 
             public override void Update() {
                 if (Parent.currentTool != this) {
@@ -27,9 +29,10 @@ namespace Celeste.Mod.MapNotes.Entities {
 
         public Tool currentTool;
 
-        public NoteController() {
+        public EditController() {
             Visible = true;
             Tag = Tags.Global | Tags.PauseUpdate | Tags.FrozenUpdate;
+            Depth = -100000;
         }
 
         public override void Added(Scene scene) {
@@ -45,23 +48,24 @@ namespace Celeste.Mod.MapNotes.Entities {
         public override void Update() {
             base.Update();
 
-            mousePos.X = MInput.Mouse.Position.X * (level.Camera.Viewport.Width / 1920f);
-            mousePos.Y = MInput.Mouse.Position.Y * (level.Camera.Viewport.Height / 1080f);
+            mouseViewportPosition.X = MInput.Mouse.Position.X * (level.Camera.Viewport.Width / 1920f);
+            mouseViewportPosition.Y = MInput.Mouse.Position.Y * (level.Camera.Viewport.Height / 1080f);
 
-            cameraOffset.X = level.Camera.Left;
-            cameraOffset.Y = level.Camera.Top;
+            Vector2 prevMouseWorldPosition = mouseWorldPosition;
 
-            Position.X = MathF.Min(cameraOffset.X + mousePos.X, level.Camera.Right);
-            Position.Y = MathF.Min(cameraOffset.Y + mousePos.Y, level.Camera.Bottom);
+            mouseWorldPosition.X = MathF.Min(level.Camera.Left + mouseViewportPosition.X, level.Camera.Right);
+            mouseWorldPosition.Y = MathF.Min(level.Camera.Top + mouseViewportPosition.Y, level.Camera.Bottom);
 
-            levelPos.X = (int)Math.Abs(level.Bounds.Left - Position.X);
-            levelPos.Y = (int)Math.Abs(level.Bounds.Bottom - Position.Y - level.Session.LevelData.Bounds.Height);
+            mouseDelta = mouseWorldPosition - prevMouseWorldPosition;
+
+            mouseRoomPosition.X = (int)Math.Abs(level.Bounds.Left - mouseWorldPosition.X);
+            mouseRoomPosition.Y = (int)Math.Abs(level.Bounds.Bottom - mouseWorldPosition.Y - level.Session.LevelData.Bounds.Height);
         }
 
         // for debugging, not to be shipped
         public override void Render() {
             base.Render();
-            ActiveFont.Draw(levelPos.ToString(), cameraOffset, default, new Vector2(0.2f, 0.2f), Color.Black);
+            ActiveFont.Draw(mouseRoomPosition.ToString(), level.Camera.Position, default, new Vector2(0.2f, 0.2f), Color.Black);
         }
     }
 }

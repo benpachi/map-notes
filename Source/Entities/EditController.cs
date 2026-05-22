@@ -14,6 +14,8 @@ namespace Celeste.Mod.MapNotes.Entities {
         public Vector2 mouseRoomPosition;
         public Vector2 mouseDelta; // In Celeste pixels
 
+
+        private static MapNotesModuleSettings Settings => MapNotesModule.Settings;
         public Level level;
 
         public class Tool : Entity {
@@ -38,15 +40,20 @@ namespace Celeste.Mod.MapNotes.Entities {
         public override void Added(Scene scene) {
             base.Added(scene);
             level = SceneAs<Level>();
-        }
-
-        public override void Awake(Scene scene) {
-            base.Awake(scene);
             scene.Add(currentTool = new Tools.Pencil(this));
+
         }
 
         public override void Update() {
             base.Update();
+
+            if (Settings.ButtonToggleTool.Pressed) {
+                if (currentTool is Tools.Pencil) {
+                    SceneAs<Level>().Add(currentTool = new Tools.Eraser(this));
+                } else {
+                    SceneAs<Level>().Add(currentTool = new Tools.Pencil(this));
+                }
+            }
 
             mouseViewportPosition.X = MInput.Mouse.Position.X * (level.Camera.Viewport.Width / 1920f);
             mouseViewportPosition.Y = MInput.Mouse.Position.Y * (level.Camera.Viewport.Height / 1080f);

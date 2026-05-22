@@ -10,36 +10,32 @@ using Microsoft.Xna.Framework;
 namespace Celeste.Mod.MapNotes.Entities.Tools {
     public class FreehandTool : EditController.Tool {
 
-        public int Size;
-        /*public enum BrushShape {
-            square,
-            round
-        }*/
+        public float[,] Surface;
 
-        public static float[,] GetBrushWeights(int size) {
-            float[,] weights = new float[size, size];
+        public static float[,] GenerateSurface(int size) {
+            float[,] surface = new float[size, size];
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
-                    weights[i, j] = 1f;
+                    surface[i, j] = 0.5f;
                 }
             }
-            return weights;
+            return surface;
         }
 
-        public static Dictionary<Vector2, Color> ApplyBrush(Vector2[] points, float[,] weights, int size) {
-            var drawnPoints = new Dictionary<Vector2, Color>();
+        public static Dictionary<Vector2, Color> ApplySurface(Vector2[] points, float[,] weights, int size, Color color) {
+            var pixels = new Dictionary<Vector2, Color>();
 
             foreach (Vector2 point in points ) {
                 for (int i = 0; i < size; i++) {
                     for (int j = 0; j < size; j++) {
                         float weight = weights[i, j];
-                        Vector2 drawn = new Vector2(x: point.X + i, y: point.Y + j);
-                        drawnPoints[drawn] = Color.Black * weight;
+                        Vector2 pixelIndex = new Vector2(x: point.X + i, y: point.Y + j);
+                        pixels[pixelIndex] = color * weight;
                     }
                 }
             }
 
-            return drawnPoints;
+            return pixels;
         }
 
         public static Vector2[] GetBresenhamLine(Vector2 start, Vector2 end) {

@@ -54,7 +54,7 @@ public class MapNotesModule : EverestModule {
         string roomName = level.Session.Level;
 
         if (isFromLoader) {
-            var noteController = new NoteController();
+            var noteController = new EditController();
             level.Add(noteController);
         }
 
@@ -75,20 +75,32 @@ public class MapNotesModule : EverestModule {
 
         foreach (KeyValuePair<Vector2, Color> pixel in pixels) {
             int pixelIndex = (int)(pixel.Key.Y * level.Bounds.Width + pixel.Key.X);
+            Color targetColor = SaveData.NoteCellDict[(mapName, roomName)][pixelIndex];
+            Color blendedColor = BlendColors(targetColor, pixel.Value);
+
+            SaveData.NoteCellDict[(mapName, roomName)][pixelIndex] = blendedColor;
+        }
+    }
+
+    public static void SetPixelData(Level level, Dictionary<Vector2, Color> pixels) {
+        string mapName = level.Session.Area.SID;
+        string roomName = level.Session.Level;
+
+        foreach (KeyValuePair<Vector2, Color> pixel in pixels) {
+            int pixelIndex = (int)(pixel.Key.Y * level.Bounds.Width + pixel.Key.X);
             SaveData.NoteCellDict[(mapName, roomName)][pixelIndex] = pixel.Value;
         }
+    }
 
-        /*for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                int index = y * width + x;
-                Color color = brushData[index];
-                Vector2 pixelPosition = new Vector2(x + position.X, y + position.Y);
+    public static Color BlendColors(Color oldColor, Color newColor) {
+        float newAlpha = newColor.A / 255f;
+        float oldAlpha = oldColor.A / 255f;
 
-                int roomWidth = level.Bounds.Width;
+        byte r = (byte)(newColor.R * newAlpha + oldColor.R * (1 - newAlpha));
+        byte g = (byte)(newColor.G * newAlpha + oldColor.G * (1 - newAlpha));
+        byte b = (byte)(newColor.B * newAlpha + oldColor.B * (1 - newAlpha));
+        byte a = (byte)(newAlpha * 255 + oldAlpha * (1 - newAlpha) * 255);
 
-                int pixelIndex = (int)(pixelPosition.Y * roomWidth + pixelPosition.X);
-                SaveData.NoteCellDict[(mapName, roomName)][pixelIndex] = color;
-            }
-        }*/
+        return new Color(r, g, b, a);
     }
 }

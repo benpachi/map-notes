@@ -38,8 +38,10 @@ namespace Celeste.Mod.MapNotes.Entities.Tools {
         public override void Update()
         {
             base.Update();
-            if (Settings.ButtonCursorInteract.Check)
-            {
+
+            Visible = Settings.NoteOverlayEnabled;
+
+            if (Settings.ButtonCursorInteract.Check) {
                 Vector2 prevRoomPosition = Parent.mouseRoomPosition - Parent.mouseDelta;
                 Vector2[] inputArea = GetBresenhamLine(prevRoomPosition, Parent.mouseRoomPosition);
                 var output = ApplySurface(inputArea, Surface, SurfaceSize, Color.Transparent);

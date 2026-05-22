@@ -32,7 +32,7 @@ namespace Celeste.Mod.MapNotes.Entities {
         public Tool currentTool;
 
         public EditController() {
-            Visible = true;
+            Visible = Settings.NoteOverlayEnabled;
             Tag = Tags.Global | Tags.PauseUpdate | Tags.FrozenUpdate;
             Depth = -100000;
         }
@@ -41,11 +41,12 @@ namespace Celeste.Mod.MapNotes.Entities {
             base.Added(scene);
             level = SceneAs<Level>();
             scene.Add(currentTool = new Tools.Pencil(this));
-
         }
 
         public override void Update() {
             base.Update();
+
+            Visible = Settings.NoteOverlayEnabled;
 
             if (Settings.ButtonToggleTool.Pressed) {
                 if (currentTool is Tools.Pencil) {
@@ -60,8 +61,8 @@ namespace Celeste.Mod.MapNotes.Entities {
 
             Vector2 prevMouseWorldPosition = mouseWorldPosition;
 
-            mouseWorldPosition.X = MathF.Min(level.Camera.Left + mouseViewportPosition.X, level.Camera.Right);
-            mouseWorldPosition.Y = MathF.Min(level.Camera.Top + mouseViewportPosition.Y, level.Camera.Bottom);
+            mouseWorldPosition.X = MathF.Min(level.Camera.Left + mouseViewportPosition.X, level.Camera.Right - Settings.SurfaceSize);
+            mouseWorldPosition.Y = MathF.Min(level.Camera.Top + mouseViewportPosition.Y, level.Camera.Bottom - Settings.SurfaceSize);
 
             mouseDelta = mouseWorldPosition - prevMouseWorldPosition;
 

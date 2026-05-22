@@ -19,7 +19,7 @@ namespace Celeste.Mod.MapNotes.Entities.Tools {
         public Color[] PixelBufferData = [];
         public Texture2D PixelBufferTexture;
 
-        public bool clearFlag = false;
+        public bool clearBuffer = false;
 
         public Level level;
 
@@ -47,12 +47,13 @@ namespace Celeste.Mod.MapNotes.Entities.Tools {
         public override void Update() {
             base.Update();
 
-            // keeps the buffer visible for one more frame to prevent flicker
-            if (clearFlag == true) {
+            Visible = Settings.NoteOverlayEnabled;
+
+            if (clearBuffer == true) {
                 PixelBuffer = [];
                 PixelBufferData = [];
                 PixelBufferTexture = null;
-                clearFlag = false;
+                clearBuffer = false;
             }
 
             if (Settings.ButtonCursorInteract.Pressed) {
@@ -76,7 +77,8 @@ namespace Celeste.Mod.MapNotes.Entities.Tools {
 
             if (Settings.ButtonCursorInteract.Released) {
                 MapNotesModule.AddPixelData(Parent.level, PixelBuffer);
-                clearFlag = true;
+                // Wait until next frame to clear the buffer arrays to prevent flicker
+                clearBuffer = true;
             }
         }
 
